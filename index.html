@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"></meta>
+    <title>Deskboard</title>
+</head>
+<body>
+    <div id="boards">
+   
+    </div>
+    
+    <div id="sidebar">
+        <div class="sidebar-items">
+            <div class="text-background">
+                Выберите фон вашей доски
+            </div>
+            <div id="backgrounds">
+    
+            </div>
+            <div class="text-background">
+                Выберите цвет вашей доски
+            </div>
+            <div id="colors">
+    
+            </div>
+        </div>
+    </div>
+    
+    <div id="side-menu">
+        <div class="add addboard" onclick="boardAdd()">
+            + Добавить доску
+         </div>
+        <div id="side-menu-title">
+    
+        </div>
+         <div class="close-side-menu" onclick="toggleBoardsList()">
+            &#10006;
+         </div>
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    <template id="tmpl-board">
+        <div class="board bg-fix" style="background-image: url('${board_background}');">
+            <div class="board-header flex-box">
+                <div>
+                    <input class="board-rename" type="text" value="${board_header}" oninput="boardRename(${board_number})">
+                </div>
+                <div id="lines" onclick="toggleMenu()">
+                    &#9776;
+                </div>
+                <div class="board-menu" onclick="toggleBoardsList()">
+                    Boards
+                </div>
+            </div>
+            <div class="board-content ">
+                <div class="flex-box">
+                    ${board_content}
+                </div>
+                <div>
+                    <button class="addColumn" onclick="columnAdd()">
+                        +
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    
+    <template id="tmpl-column">
+        <div id="${column_number}" class="column">
+            <div class="column-header flex-box">
+                <div>
+                    <input class="name" type="text" value="${column_header}" oninput="columnRename(${column_number})">
+                </div>
+                <div class="column-delete to-right" onclick="columnDelete(${column_number})">
+                    &#10006;
+                </div>
+            </div>
+            <div class="column-content">
+                ${column_content}
+            </div>
+                <div class="card-form">
+                    <div>
+                        <input class="card-title" type="text">
+                     </div>
+                    <div>
+                         <textarea class="card-description"></textarea>
+                    </div>
+                    <div>
+                        <input class="card-time" type="datetime-local">
+                    </div>
+                    <div>
+                        <button class="btn" onclick="cardAdd(${board_number}, ${id})">Создать</button>
+                    </div>
+                </div>
+                <div class="add" onclick="addtask(${id})">+ Добавить карточку</div>
+        </div>
+    </template>
+    
+    
+    <template id="tmpl-card">
+        <div class="card">
+            <div class="card-header">
+                ${card_header}
+            </div>
+            <div class="card-content ghost">
+                ${card_content}
+            </div>
+            <div title="${card_notification}">
+                ${card_notification}
+            </div>
+            <div class="card-delete" onclick="cardDelete(${column_number},${card_number})">
+                &#10006;
+            </div>
+        </div>
+    </template>
+    
+    <template id="tmpl-background">
+        <div onclick="changeBackground()" class="close title-background bg-fix" style="background-image: url('${background_image}');" data-background="${background_image}" >
+    
+        </div>
+    </template>
+    
+    <template id="tmpl-board-line">
+        <div  onclick="changeBoard()" class="side-menu-item" data-num="${board_num}">
+            ${board_title}
+            <div class="board-delete" onclick="boardDelete(${board_num})">
+                &#10006;
+            </div>
+        </div>
+    </template>
+</body>
+</html>
+
+
+<style>
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+#boards {
+    font-family: Arial;
+}
+
+.board {
+    color: white;
+    background-color: rgb(127, 127, 127);
+    height: 100vh;
+}
+
+.board-header {
+    padding: 10px;
+    text-align: center;
+}
+
+.board-header input {
+    color: white;
+    font-size: 40px;
+    background-color: transparent;
+    border: none;
+}
+
+.board-header input:focus {
+    color: black;
+    background-color: white;
+}
+
+.board-content {
+    display: flex;
+    overflow: auto;
+}
+
+.board-content::-webkit-scrollbar {
+width: 10px;
+height: 8px;
+}
+
+.board-content::-webkit-scrollbar-track {
+-webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+background-color: #f9f9fd;
+border-radius: 10px;
+}
+
+.board-content::-webkit-scrollbar-thumb {
+border-radius: 10px;
+background: linear-gradient(180deg, #7d7d7d, #cecece );
+}
+
+
+
+.column {
+    color: black;
+    width: 250px;
+    background-color: gainsboro;
+    margin: 0 10px ;
+    padding: 5px;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.column-header {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.column-header input {
+    font-size: 25px;
+    font-weight: bold;
+    background-color: transparent;
+    border: none;
+    max-width: 220px;
+}
+
+.column-header input:focus {
+    background-color: white;
+}
+
+
+
+.column-content {
+    padding: 5px;
+}
+
+.column-delete {
+    display: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.column:hover .column-delete {
+    display: block;
+}
+
+.addColumn {
+    border: none;
+    cursor: pointer;
+}
+
+.card {
+    background-color: ghostwhite;
+    border-radius: 5px;
+    margin: 5px 0;
+    position: relative;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.card-delete {
+    display: none;
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.card:hover .card-delete {
+    display: block;
+}
+
+.flex-box {
+    display: flex;
+}
+
+.to-right {
+    margin: 0 0 0 auto;
+}
+
+.ghost {
+    opacity: 0.5;
+}
+
+.bg-fix {
+    background-size: cover;
+    background-position: center;
+}
+
+#sidebar {
+    position: fixed;
+    width: 300px;
+    top:0;
+    bottom: 0;
+    right: -350px;
+    background-color: rgb(176, 176, 176);
+    transition: all 0.3s;
+    text-align: center;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+#sidebar::-webkit-scrollbar {
+width: 10px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+-webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+background-color: #f9f9fd;
+border-radius: 10px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+border-radius: 10px;
+background: linear-gradient(180deg, #7d7d7d, #cecece );
+}
+
+.sidebar-items {
+    position: relative;
+    top: 7%;
+}
+
+.sidebar-active {
+    right: 0px !important;
+}
+
+.title-background {
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    margin: 10px;
+    display: inline-block;
+}
+
+.text-background {
+    font-size: 18px;
+    margin: 5%;
+    font-family: Arial;
+    color: ghostwhite;
+}
+
+#side-menu {
+    position: fixed;
+    width: 300px;
+    height: 100vh;
+    top:0;
+    bottom: 0;
+    left: -300px;
+    background-color: rgb(176, 176, 176);
+    transition: all 0.3s;
+    text-align: center;
+    border-radius: 0 3px 3px 0;
+    box-sizing: border-box;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+
+.side-menu-active {
+    left: 0px !important;
+}
+
+.side-menu-item {
+    background-color: ghostwhite;
+    color: rgb(29, 29, 29);
+    position: relative;
+    font-weight: bold;
+    margin: 5%;
+    margin-left: 19%;
+    width: 60%;
+    height: 3%;
+    font-size: 18px;
+    padding: 2%;
+    border-radius: 7px ;
+    cursor: pointer;
+}
+
+#side-menu::-webkit-scrollbar {
+width: 10px;
+}
+
+#side-menu::-webkit-scrollbar-track {
+-webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+background-color: #f9f9fd;
+border-radius: 10px;
+}
+
+#side-menu::-webkit-scrollbar-thumb {
+border-radius: 10px;
+background: linear-gradient(180deg, #7d7d7d, #cecece );
+}
+
+.card-form {
+    display: none;
+}
+
+.card-form-active {
+    display: block;
+}
+
+.add {
+position: relative;
+text-align: center;
+color: rgb(104, 104, 104);
+border-radius: 7px;
+cursor: pointer;
+width: 220px;
+margin: 3%;
+}
+
+.addboard {
+left: 8%;
+}
+
+#lines {
+position: absolute;
+right: 2%;
+top: 2%;
+font-size: 30px;
+cursor: pointer;
+z-index: 2;
+transition: 0.5s;
+}
+
+#lines:hover {
+color:rgb(104, 104, 104);
+}
+
+.lines-active {
+position: absolute;
+right: 2%;
+top: 2%;
+font-size: 30px;
+cursor: pointer;
+z-index: 2;
+transform: rotate(90deg);
+}
+
+.btn {
+position: relative;
+margin-top: 3%;
+}
+
+.name {
+text-align: center;
+}
+
+.board-rename {
+position: relative;
+left: 100%;
+width: 80%;
+text-align: center;
+}
+
+.board-menu {
+position: absolute;
+left: 3%;
+top: 3%;
+font-size: 23px;
+cursor: pointer;
+transition: 0.3s;
+}
+
+.board-menu:hover {
+color:rgb(104, 104, 104);
+}
+
+.close-side-menu {
+position: absolute;
+top: 0;
+left: 90%;
+cursor: pointer;
+margin-bottom: 10%;
+}
+
+.board-delete {
+display: none;
+cursor: pointer;
+position: absolute;
+top: 8px;
+right: 5px;
+font-size: 12px;
+}
+
+.side-menu-item:hover .board-delete {
+display: block;
+}
+
+</style>
+
+<script>
+
+let id = 0;
+
+//создаем модель таскборда
+let data = localStorage.getItem('boards');
+console.log(data)
+
+//если нет сохраненного то выдаем стартовый объект
+if (data == null) {
+    //перезаписываем data
+    data = {
+        "boards":[
+            {
+                "title":"inordic",
+                "columns":[
+                    {
+                        "title":"Задачи",
+                        "cards":[
+
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+} else {
+    data = JSON.parse(data);
+}
+
+let currentBoardId = localStorage.setItem('current_board', 0);
+
+if (currentBoardId == null) {
+currentBoardId = 0;
+}
+
+//адрес юзера тг
+let chat_id = 892205925;
+
+renderBoards();
+
+
+//список фонов
+let backgrounds = [
+    'https://images.squarespace-cdn.com/content/v1/5fe4caeadae61a2f19719512/1612719827077-PBT0JHBYMZ0U6KHXWQPT/topcar2.jpg',
+    'https://storage.picsave.pp.ua/cluster1/origin/73232ac9b89e6b9bb3d5a92a779c89f4.jpg',
+    'https://phonoteka.org/uploads/posts/2022-07/1658245503_1-phonoteka-org-p-oboi-na-rabochii-stol-priroda-rossii-1.jpg',
+    'https://storage.picsave.pp.ua/cluster1/origin/5a0a633b18cc8b193f7a8cfcccd8f9a5.jpg',
+    'https://images.wallpaperscraft.ru/image/single/gory_pejzazh_sumerki_139582_1920x1080.jpg',
+    'https://fullhdoboi.ru/wp-content/uploads/_ph/6/295799369.jpg',
+    'https://s1.1zoom.ru/b5050/987/Dogs_Pug_Puppy_Camera_438720_1920x1080.jpg',
+    'https://s1.1zoom.ru/b6261/704/Dogs_Puppy_Snout_Pug_Paws_564875_1920x1080.jpg'
+
+];
+
+    //список фонов
+    let colors = [
+    'https://images.wallpaperscraft.ru/image/single/rozovyj_tsvet_fon_139193_1920x1080.jpg',
+    'https://images.wallpaperscraft.ru/image/single/sinij_tsvet_fon_138621_1920x1080.jpg',
+    'https://images.wallpaperscraft.ru/image/single/gradient_krasnyj_oranzhevyj_179898_1920x1080.jpg',
+    'https://images.wallpaperscraft.ru/image/single/zelenyj_tsvet_fon_140470_1920x1080.jpg',
+    'https://oir.mobi/uploads/posts/2022-08/1661349600_27-oir-mobi-p-absolyutno-chernii-fon-oboi-30.jpg',
+    'https://images.wallpaperscraft.ru/image/single/zheltyj_tsvet_fon_151944_1920x1080.jpg'
+];
+
+
+//запускаем рассыльщик через каждые 5 секунд
+setInterval(function(){
+    sender();
+}, 5000)
+
+
+//функция рассылки
+function sender() {
+
+    //бежим по всем доскам в модели
+    for (let i = 0; i < data['boards'].length; i++) {
+
+        // бежим по всем колонкам доски
+        for (let j = 0; j < data['boards'][i]['columns'].length; j++) {
+
+            //бежим по всем карточкам колонки
+            for (let k = 0; k < data['boards'][i]['columns'][j]['cards'].length; k++) {
+
+                // делаем рассылку задачи если установленно время
+                if (data['boards'][i]['columns'][j]['cards'][k]['time'] != '') {
+                    sendMessage(data['boards'][i]['columns'][j]['cards'][k]['title'], chat_id);
+
+                    //ставим отметку что уже отправилось просо затирая время
+                    data['boards'][i]['columns'][j]['cards'][k]['time'] = '';
+                }
+            }
+
+        }
+
+        save();
+        //если время совпало то делаем отправляем эту задачу в телеграм и помечаем что она отослана (убираем время)
+    }
+
+    function sendMessage(text, chat_id) {
+        //формируем адрес запроса
+        let url = 'https://api.telegram.org/bot5521315588:AAHgmnzbi4_ZoHfiMiEi19zHWXAvcd_dmS4/sendMessage?chat_id='  + chat_id + '&text=' + text;
+        
+        //отправляем 
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true); //тут отправляем данные АСИНХРОНОО и не ждем ответ
+        xhr.send();
+    }
+
+
+}
+
+console.log(data)
+
+
+
+renderBoards();
+
+renderBackgrounds();
+
+renderColors();
+
+
+//функция чтобы открыть и спрятать меню
+function toggleMenu() {
+
+    document.getElementById('sidebar').classList.toggle('sidebar-active')
+    document.getElementById('lines').classList.toggle('lines-active');
+    
+}
+
+//функция чтобы открыть и спрятать меню
+function toggleBoardsList() {
+
+        document.getElementById('side-menu').classList.toggle('side-menu-active');
+}
+
+
+//функция сохранения
+function save() {
+
+    //кодируем data в json
+    let dataJson = JSON.stringify(data);
+
+    //сохраняем в localStorage
+    localStorage.setItem('boards',dataJson);
+
+    //сохраняем в localStorage
+    localStorage.setItem('current_board', currentBoardId);
+}
+
+function changeBackground() {
+
+    //получаем катинку из плитки
+    let background = event.target.getAttribute('data-background');
+
+    data['boards'][currentBoardId]['background'] = background;
+
+    renderBoards();
+
+    save();
+}
+
+//функция для переключения досок
+function changeBoard() {
+
+    //определяем номер доски на которую кликнули
+    let num = event.target.getAttribute('data-num');
+
+    //меняем текущий номер доски
+    currentBoardId = num;
+
+    //перерисовываем доски с учетом текущего номера доски
+    renderBoards();
+    
+    save();
+}
+
+
+//функция для отрисовки плиток с фоном
+function renderBackgrounds() {
+
+    //получаем шаблоны
+    let tmpl_background = document.getElementById('tmpl-background').innerHTML;
+
+    //находим контейнер под доски
+    let container = document.getElementById('backgrounds');
+
+    //в цикле подставляем данные в шаблоны (СОБИРАЕМ ФОНЫ)
+    for (let i = 0; i < backgrounds.length; i++ ) {
+
+        container.innerHTML += tmpl_background.replace('${background_image}',backgrounds[i])
+                                              .replace('${background_image}',backgrounds[i])
+                                              .replace('${background_image}',backgrounds[i])
+                                              .replace('${background_image}',backgrounds[i])
+                                              .replace('${background_image}',backgrounds[i])
+                                              .replace('${background_image}',backgrounds[i]);
+    }
+}
+
+    //функция для отрисовки плиток с фоном
+    function renderColors() {
+
+    //получаем шаблоны
+    let tmpl_background = document.getElementById('tmpl-background').innerHTML;
+
+    //находим контейнер под доски
+    let container = document.getElementById('colors');
+
+    //в цикле подставляем данные в шаблоны (СОБИРАЕМ ФОНЫ)
+    for (let i = 0; i < colors.length; i++ ) {
+
+        container.innerHTML += tmpl_background.replace('${background_image}',colors[i])
+                                            .replace('${background_image}',colors[i])
+                                            .replace('${background_image}',colors[i])
+                                            .replace('${background_image}',colors[i])
+                                            .replace('${background_image}',colors[i])
+                                            .replace('${background_image}',colors[i]);
+    }
+}
+
+//функция для отрисовки плиток с фоном
+function renderBoardsList() {
+
+    //получаем шаблоны
+    let tmpl_board = document.getElementById('tmpl-board-line').innerHTML;
+
+    //находим контейнер под доски
+    let container = document.getElementById('side-menu-title');
+    
+    //отчищаем контейнер
+    container.innerHTML = '';
+
+    //в цикле подставляем данные в шаблоны (СОБИРАЕМ ФОНЫ)
+    for (let i = 0; i < data['boards'].length; i++ ) {
+
+        container.innerHTML += tmpl_board.replace('${board_title}',data['boards'][i]['title'])
+                                          .replace('${board_num}',i)
+                                          .replace('${board_num}',i);
+    }
+}
+
+
+//функция отрисовки досок
+function renderBoards() {
+
+    //получаем шаблоны
+    let tmpl_board = document.getElementById('tmpl-board').innerHTML;
+    let tmpl_column = document.getElementById('tmpl-column').innerHTML;
+    let tmpl_card = document.getElementById('tmpl-card').innerHTML;
+
+    //находим контейнер под доски
+    let container = document.getElementById('boards');
+
+    //очищаем доски
+    container.innerHTML = '';
+
+    //в цикле подставляем данные в шаблоны (СОБИРАЕМ ДОСКИ)
+    for (let i = 0; i < data['boards'].length; i++ ) {
+
+        //если ноиер доски в списке не совпадае с номером текущей доски то не рисуем её
+        if(i != currentBoardId) {
+            continue;
+        }
+
+        //собираем html колонок доски  (СОБИРАЕМ КОЛОНКИ ДОСКИ)
+        let boardColumns = '';
+        for (let j = 0; j < data['boards'][i]['columns'].length; j++) { 
+
+
+            //собираем html карточек колонки (СОБИРАЕМ КАРТОЧКИ КОЛОНКИ)
+            let columnCards = '';
+            for (let k = 0; k < data['boards'][i]['columns'][j]['cards'].length; k++) {
+
+                //html одной карточки
+                let cardHtml = tmpl_card.replace('${card_header}',data['boards'][i]['columns'][j]['cards'][k]['title'])
+                                        .replace('${column_number}',j)
+                                        .replace('${card_number}',k)
+                                        .replace('${card_notification}', data['boards'][i]['columns'][j]['cards'][k]['time'] )
+                                        .replace('${card_notification}', (data['boards'][i]['columns'][j]['cards'][k]['time'] != '') ? '&#10148;' :  '' )
+                                        .replace('${card_content}',data['boards'][i]['columns'][j]['cards'][k]['description']);   
+
+                //добавляем готовый текст карточки к картокам КОЛОНКИ
+                columnCards += cardHtml;
+
+            }
+
+            //html одной колоночки
+            let columnHtml = tmpl_column.replace('${column_header}',data['boards'][i]['columns'][j]['title'])
+                                        .replace('${column_number}',j)
+                                        .replace('${column_number}',j)
+                                        .replace('${column_number}',j)
+                                        .replace('${id}',j)
+                                        .replace('${board_number}',i)
+                                        .replace('${id}',j)
+                                        .replace('${id}',j)
+                                        .replace('${column_content}',columnCards);
+
+            //добавляем готовый текст КОЛОНКИ к колонкам ДОСКИ
+            boardColumns += columnHtml;
+
+        }
+
+        //подстваляем данные в шаблон доски и добавляем в контейнер
+        container.innerHTML += tmpl_board.replace('${board_header}',data['boards'][i]['title'])
+                                         .replace('${board_background}',data['boards'][i]['background']) 
+                                         .replace('${board_background}',data['boards'][i]['background']) 
+                                         .replace('${board_number}',i) 
+                                         .replace('${board_content}',boardColumns);
+    }
+
+    renderBoardsList();
+}
+
+//функция переименования доски
+function boardRename(number) {
+
+    let name = event.target.value;
+
+    data['boards'][number]['title'] = name;
+
+    save();
+}
+
+//функция создания новой доски
+function boardAdd() {
+
+    //создаем объект новой доски
+    let board =  {
+                    "title":"Новая доска",
+                    "columns":[
+                        {
+                            "title":"Задачи",
+                            "cards":[]   
+                        }
+                    ]
+                };
+
+    //добавляем объект в модель
+    data['boards'].push(board);
+
+    //переключаемся на новую доску
+    currentBoardId = data['boards'].length - 1;
+
+    //отрисовать доску
+    renderBoards();
+
+    //сохранить данные
+    save();
+
+}
+
+function boardDelete(board_number) {
+    
+    //спросить подтверждение
+    let ok = confirm("Вы действительно хотите удалить доску?");  //true / false
+
+    if (ok) {
+        console.log(data);
+
+        //удаляем колонку из модели
+        data['boards'].splice(board_number,1);
+
+        //сохраняем
+        save();
+
+        //перерисовываем
+        renderBoards();
+    } 
+    
+}
+
+
+//функция создания колонки
+function columnAdd(){
+    id++;
+
+    //создаем пустую колонку
+    let column = {
+                    "id": id,
+                    "title":"Новая колонка",
+                    "cards":[]
+                 }; 
+
+    //добавляем колонку на доску
+    data['boards'][currentBoardId]['columns'].push(column)  
+
+    //вывести модель в консоль
+    console.log(data);  
+
+    //перерисовываем доски
+    renderBoards();   
+
+    save();     
+    
+}
+
+//функция переименования колонки
+function columnRename(number) {
+
+    //определяем содержимое инпута
+    let name = event.target.value;
+
+    //перезаписываем имя колонки в модели
+    data['boards'][currentBoardId]['columns'][number]['title'] = name;
+
+    //сохраняем
+    save();
+}
+
+//функция для удаления колонок
+function columnDelete(number) {
+    id--;
+
+    //спросить подтверждение
+    let ok = confirm("Вы действительно хотите удалить колонку?");  //true / false
+
+    if (ok) {
+
+        //удаляем колонку из модели
+        data['boards'][currentBoardId]['columns'].splice(number,1);
+
+        //сохраняем
+        save();
+
+        //перерисовываем
+        renderBoards();
+    } 
+    
+}
+
+//функция добавления карточки(задачи)
+function cardAdd(board_number,column_number) {
+
+    console.log(column_number);
+    //создаем пустую карточку
+    let card = {};
+
+    //получить содержимое текстового поля
+    let title = event.target.closest('.card-form').querySelector('.card-title').value;
+    let description = event.target.closest('.card-form').querySelector('.card-description').value;
+    let time = event.target.closest('.card-form').querySelector('.card-time').value;
+
+    //наполняем карточку полученными данными
+    card['title'] = title;
+    card['description'] = description;
+    card['time'] = time;
+
+    //добавить карточку в модель
+    data['boards'][board_number]['columns'][column_number]['cards'].push(card);
+
+    //вывести модель в консоль
+    console.log(data);
+
+    //перерисовываем доски
+    renderBoards(); 
+
+    save();
+
+}
+
+//функция удаления карточки
+function cardDelete(column_number, card_number) {
+
+    //спросить подтверждение
+    let ok = confirm("Вы действительно хотите удалить карточку?");  //true / false
+
+    if (ok) {
+
+        //удаляем колонку из модели
+        data['boards'][currentBoardId]['columns'][column_number]['cards'].splice(card_number,1);
+
+        //сохраняем
+        save();
+
+        //перерисовываем
+        renderBoards();
+    } 
+
+}
+
+function addtask(id) {
+document.getElementsByClassName('card-form')[id].style.display = 'block';
+document.getElementsByClassName('add')[id].style.marginTop = '5%';
+}
+
+</script>
