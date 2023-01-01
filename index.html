@@ -47,8 +47,8 @@
     <template id="tmpl-board">
         <div class="board bg-fix" style="background-image: url('${board_background}');">
             <div class="board-header flex-box">
-                <div>
-                    <input class="board-rename" type="text" value="${board_header}" oninput="boardRename(${board_number})">
+                <div class="board-rename">
+                    <input type="text" value="${board_header}" oninput="boardRename(${board_number})">
                 </div>
                 <div id="lines" onclick="toggleMenu()">
                     &#9776;
@@ -85,14 +85,14 @@
                 ${column_content}
             </div>
                 <div class="card-form">
-                    <div>
-                        <input class="card-title" type="text">
+                    <div class="card-title" >
+                        <input type="text" placeholder="Задача">
                      </div>
-                    <div>
-                         <textarea class="card-description"></textarea>
+                    <div  class="card-description">
+                         <textarea placeholder="Описание"></textarea>
                     </div>
-                    <div>
-                        <input class="card-time" type="datetime-local">
+                    <div  class="card-time">
+                        <input type="datetime-local">
                     </div>
                     <div>
                         <button class="btn" onclick="cardAdd(${board_number}, ${id})">Создать</button>
@@ -175,16 +175,18 @@ body {
 .board-content {
     display: flex;
     overflow: auto;
+    height: 90.7vh;
+    align-items: flex-start;
 }
 
 .board-content::-webkit-scrollbar {
 width: 10px;
-height: 8px;
+height: 15px;
 }
 
 .board-content::-webkit-scrollbar-track {
 -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
-background-color: #f9f9fd;
+background-color: transparent;
 border-radius: 10px;
 }
 
@@ -388,22 +390,68 @@ background: linear-gradient(180deg, #7d7d7d, #cecece );
     display: none;
 }
 
-.card-form-active {
+.card-form input {
     display: block;
+    color: white;
+    background-color: ghostwhite;
+    width: 100%;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid rgb(208, 208, 208);
+}
+
+.card-form textarea {
+    display: block;
+    color: white;
+    background-color: ghostwhite;
+    width: 100%;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+.card-form input:focus {
+    color: black;
+    background-color: white;
+    outline: none;
+    border-radius: 5px;
+}
+
+.card-form textarea:focus {
+    color: black;
+    background-color: white;
+    outline: none;
+    border-radius: 5px;
+}
+
+.card-time input {
+    color: black;
 }
 
 .add {
 position: relative;
 text-align: center;
-color: rgb(104, 104, 104);
-border-radius: 7px;
+color: rgb(130, 130, 130);
 cursor: pointer;
-width: 220px;
-margin: 3%;
+width: 100%;
+transition: 0.7s;
+border-radius: 5px;
+margin-top: 5%;
+padding-top: 2%;
+}
+
+.add:hover {
+    background-color: #a4a4a4;
+    color: #fff;
 }
 
 .addboard {
-left: 8%;
+left: 3%;
+top: 1%;
+height: 3vh;
+margin-top: 5%;
+width: 93%;
 }
 
 #lines {
@@ -433,17 +481,56 @@ transform: rotate(90deg);
 .btn {
 position: relative;
 margin-top: 3%;
+box-sizing: border-box;
+padding: 0 20px;
+outline: none;
+border: none;  
+border-radius: 4px;
+height: 25px;
+line-height: 25px;
+font-size: 14px;
+font-weight: 500;
+text-decoration: none;
+color: #fff;
+background-color: #b5b5b5;
+box-shadow: 0 2px #696969;
+cursor: pointer;
+user-select: none;
+appearance: none;
+touch-action: manipulation;  
+vertical-align: top;
+transition: 0.6s;
+}
+
+.btn:hover {
+	background-color: #717171;
+}
+.btn:active {
+	background-color: #c4cbd4 !important;
+}
+.btn:focus-visible {
+	box-shadow: 0 0 0 3px rgb(108, 108, 108);
+}
+.btn:disabled {
+	background-color: #6c87b5;
+	pointer-events: none;
 }
 
 .name {
 text-align: center;
+transition: 0.3s;
+outline: none;
+border-radius: 5px;
 }
 
-.board-rename {
+.board-rename input {
 position: relative;
 left: 100%;
 width: 80%;
 text-align: center;
+transition: 0.3s;
+outline: none;
+border-radius: 5px;
 }
 
 .board-menu {
@@ -479,6 +566,8 @@ font-size: 12px;
 .side-menu-item:hover .board-delete {
 display: block;
 }
+
+
 
 </style>
 
@@ -850,7 +939,9 @@ function boardDelete(board_number) {
 
         //перерисовываем
         renderBoards();
+
     } 
+
     
 }
 
